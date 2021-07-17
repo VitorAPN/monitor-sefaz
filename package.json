@@ -1,0 +1,22 @@
+{
+  "name": "monitor-sefaz",
+  "version": "1.0.0",
+  "description": "Um monitor da sefaz que tira dados de outro monitor da sefaz.",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VitorAPN/monitor-sefaz.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VitorAPN/monitor-sefaz/issues"
+  },
+  "homepage": "https://github.com/VitorAPN/monitor-sefaz#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}

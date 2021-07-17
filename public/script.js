@@ -16,18 +16,18 @@ async function getData(){
     return data[0];
 }
 
-function change_uf(new_uf){
+async function change_uf(new_uf){
     if(new_uf == 'sc' && podeissoarnaldo != 1){
-        api_url.replace('pr','sc');
+        api_url = api_url.replace('pr','sc');
         podeissoarnaldo = 1;
-        current_data = getData();
+        current_data = await getData();
         change_data();
     }
     else if(new_uf == 'pr' && podeissoarnaldo != 2){
-        api_url.replace("sc","pr");
+        api_url = api_url.replace("sc","pr");
         console.log(api_url)
         podeissoarnaldo = 2;
-        current_data = getData();
+        current_data = await getData();
         change_data();
     }
 }
