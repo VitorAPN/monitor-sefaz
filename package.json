@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/VitorAPN/monitor-sefaz#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "nedb": "^1.8.0",
+    "node-fetch": "^2.6.1"
   }
 }

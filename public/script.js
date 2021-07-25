@@ -9,12 +9,12 @@ let default_uf = uf.innerHTML;
 let default_status = status.innerHTML;
 let default_response_time = response_time.innerHTML;
 
-async function getData(){
+/*async function getData(){
     const response = await fetch(api_url);
     const data = await response.json();
     console.log(data[0]);
     return data[0];
-}
+}; */
 
 async function change_uf(new_uf){
     if(new_uf == 'sc' && podeissoarnaldo != 1){
