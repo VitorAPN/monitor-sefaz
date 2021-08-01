@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <title>Monitor Sefaz</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.0/dist/chart.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
     <h1>Monitor Sefaz</h1>
-    <button id="SC" onclick="change_uf('sc');">SC</button>
-    <button id="PR" onclick="change_uf('pr');">PR</button>
-    <h2 id = 'uf'>UF: </h2>
-    <h2 id = 'tempo_resposta'>Tempo de resposta: </h2>
-    <h2 id = 'status'>Status: </h2>
+    <div id="ufs"></div>
+    <canvas id="myChart" width="400" height="400"></canvas>
     <script src="script.js"></script>
 </body>
 </html>

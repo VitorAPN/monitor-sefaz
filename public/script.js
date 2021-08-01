@@ -1,39 +1,75 @@
+var myChart;
 
-let api_url = 'https://cors-anywhere.herokuapp.com/http://monitor.tecnospeed.com.br/monitores?current=true&worker_id=sefaz_nfe_envio_sc';
-let podeissoarnaldo = 0;
-let current_data;
-let uf =  document.getElementById('uf');
-let status = document.getElementById('status');
-let response_time = document.getElementById('tempo_resposta');
-let default_uf = uf.innerHTML;
-let default_status = status.innerHTML;
-let default_response_time = response_time.innerHTML;
+const ufs_nfe = ['ac','al','am','ap','ba','ce','df','es','go','ma','mg','ms','mt',
+'pa','pb','pe','pi','pr','rj','rn','ro','rr','rs','sc','se','sp','to'];
 
-/*async function getData(){
-    const response = await fetch(api_url);
-    const data = await response.json();
-    console.log(data[0]);
-    return data[0];
-}; */
-
-async function change_uf(new_uf){
-    if(new_uf == 'sc' && podeissoarnaldo != 1){
-        api_url = api_url.replace('pr','sc');
-        podeissoarnaldo = 1;
-        current_data = await getData();
-        change_data();
-    }
-    else if(new_uf == 'pr' && podeissoarnaldo != 2){
-        api_url = api_url.replace("sc","pr");
-        console.log(api_url)
-        podeissoarnaldo = 2;
-        current_data = await getData();
-        change_data();
-    }
+function render_buttons(uf){
+    return ('<button class="button_uf" onclick="getData('+uf+')">' +ufs_nfe[uf].toUpperCase()+ '</button>');
+}
+async function getData(uf) {
+    const data = { uf : ufs_nfe[uf]};
+    const option={
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body : JSON.stringify(data)
+    };
+    fetch('/consulta', option)
+    .then(response => response.json())
+    .then(response =>{
+        let datax = [], statusy = [];
+        response.forEach(data => {
+            const minutes = new Date(data.datahora).getMinutes() + '';
+            datax.push(new Date(data.datahora).getHours() + ':'+ ((minutes.length == 2) ? minutes : '0' + minutes) );
+            statusy.push(data.tempo)
+        });
+        if (myChart) myChart.destroy();
+        create_charth(datax, statusy, ufs_nfe[uf].toUpperCase());
+    }).catch(() => {
+        console.log('Chamada deu errado')
+    });
 }
 
-function change_data(){
-    status.innerHTML = default_status + current_data.status;
-    response_time.innerHTML = default_response_time + current_data.tempo;
+async function create_charth(x, y, uf) {
+    var ctx = document.getElementById('myChart').getContext('2d');
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: x,
+            datasets: [{
+                label: 'Monitor de ' + uf,
+                data: y,
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
 }
+
+let element = document.getElementById('ufs');
+// for (uf  of ufs_nfe){
+//     element.innerHTML += render_buttons(uf);
+// };
+
+// ufs_nfe.forEach(uf => {
+//     element.innerHTML += render_buttons(uf.parseInt());
+// });
+
+for(index in ufs_nfe) {
+    element.innerHTML += render_buttons(index);
+}
+
 
