@@ -2,6 +2,7 @@ var myChart;
 
 const ufs_nfe = ['ac','al','am','ap','ba','ce','df','es','go','ma','mg','ms','mt',
 'pa','pb','pe','pi','pr','rj','rn','ro','rr','rs','sc','se','sp','to'];
+const document_types = ['nfe','nfce'];
 
 function render_buttons(uf){
     return ('<button class="button_uf" onclick="getData('+uf+')">' +ufs_nfe[uf].toUpperCase()+ '</button>');
@@ -33,6 +34,7 @@ async function getData(uf) {
 
 async function create_charth(x, y, uf) {
     var ctx = document.getElementById('myChart').getContext('2d');
+    ctx.height = 50;
     myChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -50,6 +52,8 @@ async function create_charth(x, y, uf) {
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true
