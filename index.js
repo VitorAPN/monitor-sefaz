@@ -30,9 +30,10 @@ app.post('/consulta', async (request, response)=>{
 async function get_data_and_store(document_type,uf){
     let api_url = 'http://monitor.tecnospeed.com.br/monitores?current=true&worker_id=sefaz_'+ document_type +'_envio_'+uf;
     await fetch(api_url)
-
+    
     .then(resposta => resposta.json())
     .then(resposta =>{
+        find_errors(resposta);
         database.insert(resposta);
     }).catch(() => {
         console.log("Erro ao pegar dados de: " +document_type +uf);
@@ -48,7 +49,17 @@ function GetSortOrder(prop) {
         }    
         return 0;    
     }    
-}   
+} 
+
+async function find_errors(response){
+    if (response.erro){
+        console.log(response.erro);
+    }else if(response.tempo >= 5000 && response.tempo < 30000 ){
+        console.log("O servidor apresentou lentidão");
+    }else if(response.tempo >= 30000){
+        console.log("O servidor esta muito lento")
+    }
+}
 
 async function retrieve_all_data(){
     console.log('recebendo dados');
