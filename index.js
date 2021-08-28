@@ -17,7 +17,7 @@ app.get('/', function (req, res) {
     res.render('index', {});
   });
 app.post('/consulta', async (request, response)=>{
-    database.find({"id_worker":"sefaz_nfe_envio_"+request.body.uf})
+    database.find({"id_worker":"sefaz_"+request.body.doc+"_envio_"+request.body.uf})
     .sort({ "datahora": -1 })
     .limit(10)
     .exec((err,data)=>{
@@ -27,13 +27,17 @@ app.post('/consulta', async (request, response)=>{
     })
 });
 
+app.post('/erros', async (request, response)=>{
+
+})
+
 async function get_data_and_store(document_type,uf){
     let api_url = 'http://monitor.tecnospeed.com.br/monitores?current=true&worker_id=sefaz_'+ document_type +'_envio_'+uf;
     await fetch(api_url)
     
     .then(resposta => resposta.json())
     .then(resposta =>{
-        find_errors(resposta);
+        find_errors(resposta, document_type, uf);
         database.insert(resposta);
     }).catch(() => {
         console.log("Erro ao pegar dados de: " +document_type +uf);
@@ -51,13 +55,13 @@ function GetSortOrder(prop) {
     }    
 } 
 
-async function find_errors(response){
-    if (response.erro){
+async function find_errors(response,document_type,uf){
+    if(response.erro){
         console.log(response.erro);
     }else if(response.tempo >= 5000 && response.tempo < 30000 ){
-        console.log("O servidor apresentou lentidão");
+        console.log("O servidor "+uf+ document_type +" apresentou lentidão");
     }else if(response.tempo >= 30000){
-        console.log("O servidor esta muito lento")
+        console.log("O servidor "+uf+ document_type + " está muito lento")
     }
 }
 
@@ -76,3 +80,13 @@ async function retrieve_all_data(){
 retrieve_all_data();
 setInterval(retrieve_all_data,120000);
 
+function get_last(document_type,uf){
+        database.find({"id_worker":"sefaz_"+document_type+"_envio_"+uf})
+        .sort({ "datahora": -1 })
+        .limit(10)
+        .exec((err,data)=>{
+                data.sort(GetSortOrder("datahora"));
+                console.log(data);
+                return(data);
+        });   
+    }

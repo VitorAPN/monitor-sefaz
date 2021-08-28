@@ -3,12 +3,36 @@ var myChart;
 const ufs_nfe = ['ac','al','am','ap','ba','ce','df','es','go','ma','mg','ms','mt',
 'pa','pb','pe','pi','pr','rj','rn','ro','rr','rs','sc','se','sp','to'];
 const document_types = ['nfe','nfce'];
-
+let document_type = 1;
 function render_buttons(uf){
     return ('<button class="button_uf" onclick="getData('+uf+')">' +ufs_nfe[uf].toUpperCase()+ '</button>');
 }
+function button_uf(numero){
+    if(numero == 0 && document_type != 0){
+        document.getElementById("nfe").style.backgroundColor ="rgb(63, 206, 206)";
+        document.getElementById("nfce").style.backgroundColor="rgb(179, 218, 218)";
+        document_type = 0;
+        if(myChart){ 
+            myChart.destroy();
+        }
+    }else{
+        if(document_type !=1){
+            document.getElementById("nfce").style.backgroundColor ="rgb(63, 206, 206)";
+            document.getElementById("nfe").style.backgroundColor="rgb(179, 218, 218)";
+            document_type = 1;
+            if(myChart){ 
+                myChart.destroy();
+            }
+        }
+    } 
+}
+
 async function getData(uf) {
-    const data = { uf : ufs_nfe[uf]};
+    console.log(document_types[document_type])
+    const data = { 
+        uf : ufs_nfe[uf],
+        doc: document_types[document_type]
+    };
     const option={
         method: 'POST',
         headers: {
@@ -62,7 +86,7 @@ async function create_charth(x, y, uf) {
         }
     });
 }
-
+button_uf(0);
 let element = document.getElementById('ufs');
 // for (uf  of ufs_nfe){
 //     element.innerHTML += render_buttons(uf);
