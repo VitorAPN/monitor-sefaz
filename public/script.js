@@ -27,6 +27,30 @@ function button_uf(numero){
     } 
 }
 
+async function getErrors(){
+    console.log('eu estou executando');
+    const option={
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    };
+    fetch('/erros', option)
+    .then(response => response.json())
+    .then(response =>{
+        response.forEach(element => {
+            console.log(element);
+            console.log(element.uf);
+            erros_classe.innerHTML += render_errors(element.uf,element.document_type,element.erro);
+            //erros_classe += render_errors(element);
+        });
+    }).catch(() => {
+        console.log('Chamada de erros não ironicamente errado')
+    });
+}
+
+getErrors();
+
 async function getData(uf) {
     console.log(document_types[document_type])
     const data = { 
@@ -88,6 +112,7 @@ async function create_charth(x, y, uf) {
 }
 button_uf(0);
 let element = document.getElementById('ufs');
+let erros_classe = document.getElementById('erros');
 // for (uf  of ufs_nfe){
 //     element.innerHTML += render_buttons(uf);
 // };
@@ -99,5 +124,14 @@ let element = document.getElementById('ufs');
 for(index in ufs_nfe) {
     element.innerHTML += render_buttons(index);
 }
+
+//function render_errors(elemento){
+//    return('<h3 class="erro">O servidor'+elemento[0].uf+' '+elemento[0].document_type+' apresentou '+elemento[0].erro+'</h3>');
+//}
+function render_errors(uf,document_type,erro){
+    console.log(uf);
+    return('<h3 class="erro">O servidor '+uf+document_type+' apresentou '+erro+'</h3>');
+}
+
 
 

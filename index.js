@@ -11,6 +11,8 @@ app.use(express.json())
 app.listen(8080,() => console.log('listening at 8080'));
 app.use(express.static('public'));
 const database = new Datastore('database.db');
+const erros_db = new Datastore('erros.db');
+erros_db.loadDatabase();
 database.loadDatabase();
 
 app.get('/', function (req, res) {
@@ -23,13 +25,18 @@ app.post('/consulta', async (request, response)=>{
     .exec((err,data)=>{
         data.sort(GetSortOrder("datahora"));
         console.log(data);
-        response.json(data);
+        response.json(data);  
     })
 });
 
 app.post('/erros', async (request, response)=>{
-
-})
+    erros_db.find({})
+    .limit(10)
+    .exec((err,data)=>{
+        console.log(data);
+        response.json(data);  
+    })
+});
 
 async function get_data_and_store(document_type,uf){
     let api_url = 'http://monitor.tecnospeed.com.br/monitores?current=true&worker_id=sefaz_'+ document_type +'_envio_'+uf;
@@ -56,12 +63,18 @@ function GetSortOrder(prop) {
 } 
 
 async function find_errors(response,document_type,uf){
-    if(response.erro){
-        console.log(response.erro);
-    }else if(response.tempo >= 5000 && response.tempo < 30000 ){
-        console.log("O servidor "+uf+ document_type +" apresentou lentidão");
-    }else if(response.tempo >= 30000){
-        console.log("O servidor "+uf+ document_type + " está muito lento")
+    //console.log(response)
+    console.log("estou validando dados de" +uf +document_type);
+    //console.log(response[0].tempo);
+    if(response[0].erro){
+        erros_db.insert({'uf':uf,'document_type': document_type, 'erro': erro })
+        //console.log("O servidor"+uf+document_type+"Apresentou erro: "+response.erro);
+    }else if(response[0].tempo >= 100 && response[0].tempo < 300 ){
+        erros_db.insert({'uf':uf,'document_type': document_type, 'erro': 'Lentidão' })
+        //console.log("O servidor "+uf+ document_type +" apresentou lentidão");
+    }else if(response[0].tempo >= 300){
+        erros_db.insert({'uf':uf,'document_type': document_type, 'erro': 'Muita Lentidão' })
+        //console.log("O servidor "+uf+ document_type + " está muito lento");
     }
 }
 
@@ -79,14 +92,30 @@ async function retrieve_all_data(){
 
 retrieve_all_data();
 setInterval(retrieve_all_data,120000);
+setInterval(clear_errors,1200000);
 
-function get_last(document_type,uf){
+/*function get_last(document_type,uf){
         database.find({"id_worker":"sefaz_"+document_type+"_envio_"+uf})
         .sort({ "datahora": -1 })
         .limit(10)
         .exec((err,data)=>{
-                data.sort(GetSortOrder("datahora"));
+                let data_output = [];
                 console.log(data);
-                return(data);
+                data.sort(GetSortOrder("datahora"));
+                data.forEach(element => {
+                    data_output.push(element.tempo)
+                });
+                console.log(data_output);
         });   
-    }
+}
+
+get_last("nfe","sc");
+*/
+
+function clear_errors(){
+    erros_db.remove({ }, { multi: true }, function (err, numRemoved) {
+        erros_db.loadDatabase(function (err) {
+        });
+      });
+}
+
