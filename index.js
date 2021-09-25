@@ -6,6 +6,7 @@ const ufs_nfe = ['ac','al','am','ap','ba','ce','df','es','go','ma','mg','ms','mt
 const ufs_nfce = ['ac','al','am','ap','ba','df','es','go','ma','mg','ms','mt',
 'pa','pb','pe','pi','pr','rj','rn','ro','rr','rs','se','sp','to'];
 const document_types = ['nfe','nfce'];
+let last_errors = [];
 const app = express();
 app.use(express.json())
 app.listen(8080,() => console.log('listening at 8080'));
@@ -33,6 +34,7 @@ app.post('/erros', async (request, response)=>{
     erros_db.find({})
     .limit(10)
     .exec((err,data)=>{
+        data.sort(GetSortOrder("tempo"));
         console.log(data);
         response.json(data);  
     })
@@ -67,14 +69,16 @@ async function find_errors(response,document_type,uf){
     console.log("estou validando dados de" +uf +document_type);
     //console.log(response[0].tempo);
     if(response[0].erro){
-        erros_db.insert({'uf':uf,'document_type': document_type, 'erro': erro })
+        erros_db.insert({'uf':uf,'document_type': document_type, 'erro': response[0].erro, 'tempo': response[0].datahora, 'notificar': true})
         //console.log("O servidor"+uf+document_type+"Apresentou erro: "+response.erro);
+        last_errors.push(uf+document_type)
     }else if(response[0].tempo >= 100 && response[0].tempo < 300 ){
-        erros_db.insert({'uf':uf,'document_type': document_type, 'erro': 'Lentidão' })
+        erros_db.insert({'uf':uf,'document_type': document_type, 'erro': 'Lentidão', 'tempo': response[0].datahora, 'notificar': false})
         //console.log("O servidor "+uf+ document_type +" apresentou lentidão");
     }else if(response[0].tempo >= 300){
-        erros_db.insert({'uf':uf,'document_type': document_type, 'erro': 'Muita Lentidão' })
+        erros_db.insert({'uf':uf,'document_type': document_type, 'erro': 'Muita Lentidão', 'tempo': response[0].datahora, 'notificar': true})
         //console.log("O servidor "+uf+ document_type + " está muito lento");
+        last_errors.push(uf+document_type)
     }
 }
 
@@ -92,7 +96,7 @@ async function retrieve_all_data(){
 
 retrieve_all_data();
 setInterval(retrieve_all_data,120000);
-setInterval(clear_errors,1200000);
+//setInterval(clear_errors,1200000);
 
 /*function get_last(document_type,uf){
         database.find({"id_worker":"sefaz_"+document_type+"_envio_"+uf})

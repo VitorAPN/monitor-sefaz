@@ -4,9 +4,34 @@ const ufs_nfe = ['ac','al','am','ap','ba','ce','df','es','go','ma','mg','ms','mt
 'pa','pb','pe','pi','pr','rj','rn','ro','rr','rs','sc','se','sp','to'];
 const document_types = ['nfe','nfce'];
 let document_type = 1;
+let notifica = 0;
+let erros_recentes = [];
+
+if (Notification.permission === "granted"){
+    notifica = 1;
+}else if(Notification.permission === "default"){
+    Notification.requestPermission().then(permissao => {
+        if (permissao === "granted"){
+            notifica = 1;
+        }
+    });
+}
+
+function notificacao(){
+    if(notifica ===1 && erros_recentes != [] ){
+        const notification = new Notification("Monitor Sefaz notifica:",{
+            body: "Os seguintes servidores apresentaram erro: " + erros_recentes +".",
+        });
+        erros_recentes = [];
+    }
+}
+
+
 function render_buttons(uf){
     return ('<button class="button_uf" onclick="getData('+uf+')">' +ufs_nfe[uf].toUpperCase()+ '</button>');
 }
+
+
 function button_uf(numero){
     if(numero == 0 && document_type != 0){
         document.getElementById("nfe").style.backgroundColor ="rgb(63, 206, 206)";
@@ -26,8 +51,8 @@ function button_uf(numero){
         }
     } 
 }
-
-async function getErrors(){
+ 
+async function getErrors(uf = '',documentType='',tempo=''){
     console.log('eu estou executando');
     const option={
         method: 'POST',
@@ -42,14 +67,27 @@ async function getErrors(){
             console.log(element);
             console.log(element.uf);
             erros_classe.innerHTML += render_errors(element.uf,element.document_type,element.erro);
-            //erros_classe += render_errors(element);
+            erros_para_notificar(element);    
         });
+    notificacao()
     }).catch(() => {
         console.log('Chamada de erros não ironicamente errado')
     });
 }
 
-getErrors();
+
+
+async function erros_para_notificar(erro){
+    console.log("varios vacilao q testa nossa fé");
+    console.log(erro.notificar);
+    if(erro.notificar){
+        console.log(erro.uf + erro.document_type);
+        erros_recentes.push(erro.uf + erro.document_type);
+    }
+}
+
+
+//setInterval(getErrors(),120000);
 
 async function getData(uf) {
     console.log(document_types[document_type])
@@ -70,7 +108,7 @@ async function getData(uf) {
         let datax = [], statusy = [];
         response.forEach(data => {
             const minutes = new Date(data.datahora).getMinutes() + '';
-            datax.push(new Date(data.datahora).getHours() + ':'+ ((minutes.length == 2) ? minutes : '0' + minutes) );
+            datax.push(new Date(data.datahora).getHours() + ':'+ ((minutes.length == 2) ? minutes : '0' + minutes));
             statusy.push(data.tempo)
         });
         if (myChart) myChart.destroy();
@@ -130,7 +168,7 @@ for(index in ufs_nfe) {
 //}
 function render_errors(uf,document_type,erro){
     console.log(uf);
-    return('<h3 class="erro">O servidor '+uf+document_type+' apresentou '+erro+'</h3>');
+    return('<h3 class="erro">O servidor '+uf+document_type+' apresentou: '+erro+' | </h3>');
 }
 
 
