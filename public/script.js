@@ -30,6 +30,9 @@ function notificacao(){
 function render_buttons(uf){
     return ('<button class="button_uf" onclick="getData('+uf+')">' +ufs_nfe[uf].toUpperCase()+ '</button>');
 }
+function render_options(uf){
+    return('<option value="'+ufs_nfe[uf]+'">'+ufs_nfe[uf].toUpperCase()+'</option>');
+}
 
 
 function button_uf(numero){
@@ -52,21 +55,29 @@ function button_uf(numero){
     } 
 }
  
-async function getErrors(uf = '',documentType='',tempo=''){
+async function getErrors(uf = '',documentType='',data_inicial='',data_final){
     console.log('eu estou executando');
+    let data = {
+        uf : uf,
+        doc : documentType,
+        data_inicial : data_inicial,
+        data_final : data_final
+    }
     const option={
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
+        body: JSON.stringify(data),
     };
+    console.log(option);
     fetch('/erros', option)
     .then(response => response.json())
     .then(response =>{
         response.forEach(element => {
             console.log(element);
             console.log(element.uf);
-            erros_classe.innerHTML += render_errors(element.uf,element.document_type,element.erro);
+            erros_classe.innerHTML += render_errors(element.uf,element.document_type,element.erro,element.tempo);
             erros_para_notificar(element);    
         });
     notificacao()
@@ -149,8 +160,10 @@ async function create_charth(x, y, uf) {
     });
 }
 button_uf(0);
-let element = document.getElementById('ufs');
-let erros_classe = document.getElementById('erros');
+const element = document.getElementById('ufs');
+const erros_classe = document.getElementById('erros');
+const select_uf = document.getElementById('select_uf');
+
 // for (uf  of ufs_nfe){
 //     element.innerHTML += render_buttons(uf);
 // };
@@ -159,6 +172,24 @@ let erros_classe = document.getElementById('erros');
 //     element.innerHTML += render_buttons(uf.parseInt());
 // });
 
+function send_form(){
+    let doctype = document.querySelector('input[name="radio_doc"]:checked').value;
+    console.log(doctype);
+    const uf = document.getElementById('select_uf').value;
+    console.log(uf);
+    const data_inicial = document.getElementById('data_inicial').value;
+    console.log(data_inicial);
+    const data_final = document.getElementById('data_final').value;
+    console.log(data_final);
+    getErrors(uf,doctype,data_inicial,data_final);
+    const erros = document.getElementById('erros');
+    erros.removeChild('h3');
+}
+
+for(index in ufs_nfe) {
+    select_uf.innerHTML += render_options(index);
+}
+
 for(index in ufs_nfe) {
     element.innerHTML += render_buttons(index);
 }
@@ -166,9 +197,9 @@ for(index in ufs_nfe) {
 //function render_errors(elemento){
 //    return('<h3 class="erro">O servidor'+elemento[0].uf+' '+elemento[0].document_type+' apresentou '+elemento[0].erro+'</h3>');
 //}
-function render_errors(uf,document_type,erro){
+function render_errors(uf,document_type,erro, datahora){
     console.log(uf);
-    return('<h3 class="erro">O servidor '+uf+document_type+' apresentou: '+erro+' | </h3>');
+    return('<h3 class="erro">O servidor '+uf+document_type+' apresentou: '+erro+' | '+datahora+'</h3>');
 }
 
 

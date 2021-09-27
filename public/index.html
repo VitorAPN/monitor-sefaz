@@ -16,6 +16,20 @@
     <div id="grafico" width="400" height="800">
         <canvas id="myChart" width="400" height="400" context="2d"></canvas>
     </div>
+    <div>
+        <input type="radio" id="radio_doc_nfce" name="radio_doc" value="nfce" checked>
+        <label for="nfce">NFC-e</label>
+        <input type="radio" id="radio_doc_nfe" name="radio_doc" value="nfce">
+        <label for="nfe">NF-e</label>
+        <label for="select_uf">UF</label>
+        <select name="select_uf" id="select_uf"></select>
+        <label for="data_inicial">Data inicial</label>
+        <input type="date" id="data_inicial" name="Data_inicial">
+        <label for="data_final">Data Final</label>
+        <input type="date" id="data_final" name="Data_final">
+        <input type="submit" value="Filtrar" onclick="send_form()"> 
+    </div>
+    <label>Foram encontrados: erros</label>
     <div id = "erros"></div>
     <script src="script.js"></script>
 </body>

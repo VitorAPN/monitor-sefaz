@@ -31,8 +31,7 @@ app.post('/consulta', async (request, response)=>{
 });
 
 app.post('/erros', async (request, response)=>{
-    erros_db.find({})
-    .limit(10)
+    erros_db.find({"uf":request.body.uf,"document_type":request.body.doc})
     .exec((err,data)=>{
         data.sort(GetSortOrder("tempo"));
         console.log(data);
