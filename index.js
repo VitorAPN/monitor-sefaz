@@ -33,9 +33,18 @@ app.post('/consulta', async (request, response)=>{
 app.post('/erros', async (request, response)=>{
     erros_db.find({"uf":request.body.uf,"document_type":request.body.doc})
     .exec((err,data)=>{
-        data.sort(GetSortOrder("tempo"));
+        let data_to_send = [];
         console.log(data);
-        response.json(data);  
+        for (const element in data) {
+            console.log('mc pozer');
+            console.log(data[element]);
+            if (data[element].tempo > request.body.data_inicial && data[element].tempo < request.body.data_final) {
+                data_to_send.push(data[element]);
+            }
+        }
+        data_to_send.sort(GetSortOrder("tempo"));
+        console.log(data_to_send);
+        response.json(data_to_send);  
     })
 });
 

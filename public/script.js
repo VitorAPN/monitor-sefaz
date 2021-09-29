@@ -183,7 +183,9 @@ function send_form(){
     console.log(data_final);
     getErrors(uf,doctype,data_inicial,data_final);
     const erros = document.getElementById('erros');
-    erros.removeChild('h3');
+    erros.innerHTML = "";
+    console.log('la no marquinhos');
+    console.log('2021-09-01'>'2021-09-12T19:27:52.000Z');
 }
 
 for(index in ufs_nfe) {
