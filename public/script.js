@@ -5,7 +5,9 @@ const ufs_nfe = ['ac','al','am','ap','ba','ce','df','es','go','ma','mg','ms','mt
 const document_types = ['nfe','nfce'];
 let document_type = 1;
 let notifica = 0;
+let erros_monitorar = [];
 let erros_recentes = [];
+let erros_notificados = [];
 
 if (Notification.permission === "granted"){
     notifica = 1;
@@ -19,9 +21,31 @@ if (Notification.permission === "granted"){
 
 function notificacao(){
     if(notifica ===1 && erros_recentes != [] ){
-        const notification = new Notification("Monitor Sefaz notifica:",{
+        let mensagem = '';
+        /*const notification = new Notification("Monitor Sefaz notifica:",{
             body: "Os seguintes servidores apresentaram erro: " + erros_recentes +".",
-        });
+        });*/
+        for (const erro_notificado of erros_notificados){
+            for (const erro_recente of erros_recentes ){
+                delete erro_recente.id_;
+                delete erro_recente.tempo;
+                delete erro_notificado.id_;
+                delete erro_notificado.tempo;
+                if(erro_notificado == erro_recente){
+                    let insere = true;
+                    for (const erro_monitorado of erros_monitorar) {
+                        if(erro_notificado == erro_monitorado){
+                            insere = false;
+                        }
+                    }
+                    if(insere){
+                        erros_monitorar.push(erro_notificado);
+                        mensagem = "O servidor" + erro_notificado.uf + " " + erro_notificado.document_type + "Apresentou o erro: " +erro_notificado.erro +", novamente. Monitore clicando aqui.";
+                    };
+                }
+            }
+        }
+        erros_notificados = erros_recentes;
         erros_recentes = [];
     }
 }
@@ -74,13 +98,14 @@ async function getErrors(uf = '',documentType='',data_inicial='',data_final){
     fetch('/erros', option)
     .then(response => response.json())
     .then(response =>{
+        erros_classe.innerHTML += '<h3 id="subtitle">Foram encontrados '+response.length+' erros </h3>' ;
         response.forEach(element => {
             console.log(element);
             console.log(element.uf);
             erros_classe.innerHTML += render_errors(element.uf,element.document_type,element.erro,element.tempo);
-            erros_para_notificar(element);    
+            //erros_para_notificar(element);    
         });
-    notificacao()
+    //notificacao()
     }).catch(() => {
         console.log('Chamada de erros não ironicamente errado')
     });
@@ -93,7 +118,7 @@ async function erros_para_notificar(erro){
     console.log(erro.notificar);
     if(erro.notificar){
         console.log(erro.uf + erro.document_type);
-        erros_recentes.push(erro.uf + erro.document_type);
+        erros_recentes.push(erro);
     }
 }
 
